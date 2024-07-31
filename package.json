@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/app.js --mode desarrollo",
-    "start": "node src/app.js --mode produccion"
+    "start": "node src/app.js --mode produccion",
+    "test": "mocha test/supertest.test.js"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +37,9 @@
     "winston": "^3.13.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "chai": "^5.1.1",
+    "mocha": "^10.7.0",
+    "nodemon": "^3.1.0",
+    "supertest": "^7.0.0"
   }
 }

@@ -30,7 +30,6 @@ class ViewController {
                 return res.redirect("/login");
             }
             const user = req.user
-            // console.log(user);
 
             const coso = {
                 ...req.query,
@@ -41,8 +40,6 @@ class ViewController {
             const limit = coso.limit;
             const filtro = coso.query;
             const sort = coso.sort;
-            // const page = req.query.page || 1;
-            // const products = await productServices.getProductsPaginate(filtro, {limit: limit, page: page, sort: sort});
 
             const products = await productServices.getProductsPaginate(coso);
 

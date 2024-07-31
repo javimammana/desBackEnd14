@@ -46,6 +46,7 @@ class ProductController {
             req.logger.info("(CONTROLLER) - El producto se creo con exito");
             res.json(product);
         } catch (error) {
+            res.status(400)
             next(error);
         }
     }
@@ -64,18 +65,13 @@ class ProductController {
     async getProductsPaginate (req, res) {
         try {
 
-            const coso = {
+            const paguinacion = {
                 ...req.query,
                 limit: req.query.limit || 10,
                 page: req.query.page || 1
             }
-            // const limit = req.query.limit || 10;
-            // const filtro = req.query.query ? {category: req.query.query} : {};
-            // const sort = req.query.sort ? {price: Number(req.query.sort)} : {};
-            // const page = req.query.page || 1;
-            // const products = await productServices.getProductsPaginate(filtro, {limit: limit, page: page, sort: sort});
 
-            const products = await productServices.getProductsPaginate(coso);
+            const products = await productServices.getProductsPaginate(paguinacion);
 
             console.log(products)
 
@@ -154,7 +150,7 @@ class ProductController {
             }
 
             req.logger.info("(CONTROLLER) - Se agrego usuario para ser notificado de stock");
-            res.json("Se agrega usuario para ser notificado")
+            // res.json("Se agrega usuario para ser notificado")
             res.redirect("/products")
 
         } catch (error) {
@@ -188,7 +184,7 @@ class ProductController {
             console.log(userNvo)
 
             req.logger.info("(CONTROLLER) - Se agrego producto a favoritos");
-            res.json("Se agrega producto a favorito")
+            // res.json("Se agrega producto a favorito")
             res.redirect("/products")
         } catch (error) {
             req.logger.error("(CONTROLLER) - Error al marcar favorito el producto")

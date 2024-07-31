@@ -25,17 +25,19 @@ class CartController {
 
     async addProductCart (req, res) {
         const { cid, pid } = req.params;
+
         const user = await userServices.getUserByCID({cart: cid})
 
         const cart = await cartServices.getCartById(cid);
+
         if (!cart) {
             req.logger.error("(CONTROLLER) - El carrito no existe"); 
-            res.json("El carrito no existe");
+            return res.status(404).json("El carrito no existe");
         }
         const product = await productServices.getProductById(pid);
         if (!product) {
             req.logger.error("(CONTROLLER) - El producto no existe"); 
-            res.json("El producto no existe");
+            return res.status(404).json("El carrito no existe")
         }
 
         try {
@@ -43,25 +45,28 @@ class CartController {
             if (user.role === "PREMIUM") {
                 if (user.email === product.owner) {
                     req.logger.error("(CONTROLLER) - No podes comprar tu Propio Producto"); 
-                    res.json("No podes comprar tu Propio Producto");
+                    return res.status(403).json("No podes comprar tu Propio Producto");
                 }
             }
 
             const exist = cart.products.find(item => item.product._id.toString() === pid);
+
             if (exist) {
                 if (exist.quantity < product.stock) {
                     exist.quantity++
                 } else {
                     req.logger.warning(`(CONTROLLER) - Maximo de stock de producto ${pid}`); 
-                    res.json("Maximo de Stock")
+                    return res.status(409).json("Maximo de Stock");
                 }
             } else {
                 cart.products.push({product: pid, quantity: 1})
             }
             await cartServices.updateCart(cart._id, cart);
 
-            res.json(cart)
-            res.redirect("/products");
+            // const cartFinal = await cartServices.getCartById(cart._id)
+
+            // return res.json(cartFinal);
+            return res.redirect("/products")
 
         } catch (error) {
             res.status(500).json({error: error.message});
@@ -76,14 +81,14 @@ class CartController {
             let cart = await cartServices.getCartById(cid);
             if (!cart) {
                 req.logger.error("(CONTROLLER) - El carrito no existe"); 
-                res.json("El carrito no existe");
+                res.json("El carrito no existe").status(404);
             }
             const products = [];
             for (const prod of update) {
                 let product = await productServices.getProductById(prod.product);
                 if (!product) {
                     req.logger.error("(CONTROLLER) - El producto no existe"); 
-                    res.json("El producto no existe");
+                    res.json("El producto no existe").status(404);
                 }
 
                 if (prod.quantity <= product.stock) {
@@ -95,7 +100,7 @@ class CartController {
                     }
                     products.push(prod);
                     res.logger.warning(`(CONTROLLER) - El stock maximo del producto ${prod._id} es de ${product.stock}`);
-                    res.json(`el producto ${prod._id}, el stock maximo es de ${product.stock}`);
+                    res.json(`el producto ${prod._id}, el stock maximo es de ${product.stock}`).status(409);
                 }
             }
 
@@ -104,7 +109,7 @@ class CartController {
                 products: products
             }
             await cartServices.updateCart(cid, cart);
-            res.json(cart);
+            res.json(cart).status(200);
         } catch (error) {
             res.status(500).json({error: error.message});
         }
@@ -117,17 +122,17 @@ class CartController {
             let cart = await cartServices.getCartById(cid);
             if (!cart) {
                 req.logger.error("(CONTROLLER) - El carrito no existe"); 
-                res.json("El carrito no existe");
+                res.json("El carrito no existe").status(404);
             }
             const product = await productServices.getProductById(pid);
             if (!product) {
                 req.logger.error("(CONTROLLER) - El producto no existe"); 
-                res.json("El producto no existe");
+                res.json("El producto no existe").status(404);
             }
             const exist = cart.products.find(item => item.product._id.toString() === pid);
             if (!exist) {
                 req.logger.info("(CONTROLLER) - El producto no existe en el carrito"); 
-                res.json("El producto no existe en el carrito");
+                res.json("El producto no existe en el carrito").status(404);
             }
             if (update.quantity <= product.stock) {
                 exist.quantity = update.quantity;
@@ -135,7 +140,7 @@ class CartController {
                 res.json(cart);
             } else {
                 req.logger.warning(`(CONTROLLER) - El stock maximo para el producto ${pid}, es de ${product.stock}`);
-                res.json(`El stock maximo para el producto ${pid}, es de ${product.stock}`);
+                res.json(`El stock maximo para el producto ${pid}, es de ${product.stock}`).status(409);
             }
         } catch (error) {
             res.status(500).json({error: error.message});
@@ -148,23 +153,23 @@ class CartController {
             let cart = await cartServices.getCartById(cid);
             if (!cart) {
                 req.logger.error("(CONTROLLER) - El carrito no existe"); 
-                res.json("El carrito no existe");
+                res.json("El carrito no existe").status(404);
             }
             const product = await productServices.getProductById(pid);
             if (!product) {
                 req.logger.error("(CONTROLLER) - El producto no existe"); 
-                res.json("El producto no existe");
+                res.json("El producto no existe").status(404);
 
             }
             const exist = cart.products.find(item => item.product._id.toString() === pid);
             if (!exist) {
                 req.logger.warning(`(CONTROLLER) - El producto ${pid} no existe en el carrito`);
-                res.json("El producto no existe en el carrito");
+                res.json("El producto no existe en el carrito").status(409);
             }
             cart.products.splice(cart.products.indexOf(exist),1);
             await cartServices.updateCart(cid, cart);
             req.logger.info("(CONTROLLER) - Producto Eliminado");
-            res.json(cart);
+            res.json(cart).status(200);
         } catch (error) {
             console.log(error)
             res.status(500).json({error: error.message});
@@ -173,7 +178,8 @@ class CartController {
 
     async clearCart (req, res){
         try {
-            let cart = await cartServices.clearCart(req.params.cid);
+            await cartServices.clearCart(req.params.cid);
+            let cart = await cartServices.getCartById(req.params.cid);
             req.logger.info("(CONTROLLER) - Carrito Vaciado")
             res.json(cart);
         } catch (error) {
@@ -206,7 +212,7 @@ class CartController {
             //si ningun producto cubre el stock pedido del cliente, se corta el codigo
             if (!enStock) {
                 req.logger.warning("(CONTROLLER) - No hay Stock de Ningun Producto");
-                res.send("no hay stock de ningun profucto");
+                res.send("no hay stock de ningun profucto").status(409);
                 return;
             }
 

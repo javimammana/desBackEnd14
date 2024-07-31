@@ -39,14 +39,15 @@ class UserController {
 
     async createUser (req, res) {
         const {first_name, last_name, email, age, password, repassword} = req.body;
+
         try {
             const exist = await userServices.getUserByEmail({email: email})
             if (exist) {
                 req.logger.warning("(CONTROLLER) - El correo ya esta registrado")
-                res.status(400).json("El correo ya esta registrado");
+                return res.status(400).json("El correo ya esta registrado");
             }
             if (password !== repassword) {
-                res.status(400).json("Las contraseñas deben ser iguales")
+                return res.status(400).json("Las contraseñas deben ser iguales")
             }
             const cart = await cartServices.createCart();
             let newUser = {
@@ -83,6 +84,7 @@ class UserController {
             res.redirect("/profile");
 
         } catch (error) {
+            console.log(error)
             req.logger.error("(CONTROLLER) - Error al crear Usuario")
             res.status(500).json({error: error.message});
         }
