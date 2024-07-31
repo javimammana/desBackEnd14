@@ -1,0 +1,24 @@
+
+<div class="sticky">
+    <h1>Ingresa!</h1>
+    <div class="line"></div>
+</div>
+
+<form class="lgForm" action="/api/sessions/login" method="POST">
+    <input class="lgFormItem" type="email" name="email" placeholder="Usuario (e-Mail)" required>
+    <div class="lgFormItem inLine">
+        <input class="lgFormPass" id="loginPass" type="password" name="password" placeholder="Contraseña" required>
+        <img class="ico" src="/img/noVisible.png" id="loginPass-ico" onclick="pass()" alt="">
+    </div>
+    <button class="lgFormBtn" type="submit">Ingresar</button>
+    {{#if error}}
+        <p>{{error}}</p>
+    {{/if}}
+</form>
+    <p><a class="loginLink" href="/resetPassword">No recuerdo mi Contraseña</a></p>
+    <br>
+<p>No estas reguistrado? <a class="loginLink" href="/register">Registrate!!</a></p>
+<div><p>Ingresa con <a class="loginLink" href="/api/sessions/github">GITHUB</a></p></div>
+
+
+<script src="/js/util.js"></script>

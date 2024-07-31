@@ -1,0 +1,162 @@
+paths:
+  /api/carts/{cid}:
+    get:
+      summary: Obtener informacion de un carrito
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito que se quiere buscar
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Se obtien el carrito, los ID de productos que estan dentro y la cantidad de cada uno
+          content:
+            aplication/json:
+              schema:
+                type: object
+                items:
+                  $ref: "#components/schemas/Cart"
+        "500":
+          description: Error interno del servidor
+    put:
+      summary: Obtener informacion de un carrito
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito que se quiere buscar
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/updateCart"
+    delete:
+      summary: Limpia el carrito
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito que se quiere buscar
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Se borran todos los productos del carrito
+        "500":
+          description: Error interno del servidor
+  /api/carts/{cid}/product/{pid}:
+    post:
+      summary: Se agrega un producto al carrito
+      tags:
+      - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito del cliente
+        schema:
+          type: string
+      - name: pid
+        in: path
+        required: true
+        description: ID del producto buscado
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Se agrega producto al carrito
+        "500":
+          description: Error en el servidor
+    put:
+      summary: Modifica la cantidad de un producto del carrito
+      tags:
+      - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito del cliente
+        schema:
+          type: string
+      - name: pid
+        in: path
+        required: true
+        description: ID del producto buscado
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/updateProductCart"
+      responses:
+        "200":
+          description: Se modifica cantidad de un producto en el carrito
+        "500":
+          description: Error en el servidor
+    delete:
+      summary: Elimina un producto del carrito
+      tags:
+      - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito del cliente
+        schema:
+          type: string
+      - name: pid
+        in: path
+        required: true
+        description: ID del producto buscado
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Se elimina producto del carrito
+        "500":
+          description: Error en el servidor
+
+components:
+  schemas:
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: ID autogenerado por MongoDB
+        products:
+          type: array
+          description: Coleccion de productos en el carrito
+  requestBodies:
+    updateCart:
+      type: array
+      properties:
+        products:
+          type: array
+          description: Coleccion de productos en el carrito
+      example:
+          - product: "66509254edcb5ddf142d2f83"
+            quantity: 5
+          - product: "66509254edcb5ddf142d2f84"
+            quantity: 12
+    updateProductCart:
+      type: object
+      properties:
+        quantity:
+          type: number
+          description: Cantidad de unidades por la que se modificara
+      example:
+        quantity: 8
